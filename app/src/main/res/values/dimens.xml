@@ -4,4 +4,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="news_list_text_size">30sp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="progress_bar_size">70dp</dimen>
 </resources>

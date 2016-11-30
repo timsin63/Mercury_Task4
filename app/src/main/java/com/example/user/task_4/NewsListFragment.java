@@ -1,17 +1,25 @@
 package com.example.user.task_4;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.example.user.task_4.database.DaoSession;
+import com.example.user.task_4.database.RssItem;
+import com.example.user.task_4.database.RssItemDao;
+
+import java.util.List;
 
 /**
  * Created by User on 11/23/2016.
@@ -19,13 +27,12 @@ import java.net.URL;
 
 public class NewsListFragment extends Fragment {
 
+    private RssItemDao noteDao;
+
     public static final String TAG = "NEWS_LIST_FRAGMENT";
+    SwipeRefreshLayout swipeRefreshLayout;
+    public static String CURRENT_URL = null;
 
-    public interface onNewsChooseListener{
-        void getArticle(String newsAddress);
-    }
-
-    static onNewsChooseListener newsChooseListener;
     RecyclerView newsList;
 
     @Override
@@ -33,33 +40,48 @@ public class NewsListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.f_news_list,  container, false);
 
-        newsChooseListener = (onNewsChooseListener) getActivity();
-
         newsList = (RecyclerView) view.findViewById(R.id.news_list_view);
-
-        loadRSS();
 
         newsList.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
 
         newsList.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
 
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadDataFromDB();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        BroadcastReceiver onDownloadFinishedReciever = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadDataFromDB();
+            }
+        };
+
+        getActivity().registerReceiver(onDownloadFinishedReciever, new IntentFilter(RssDownloadService.DATABASE_UPDATED));
+
         return view;
     }
 
 
+    private void loadDataFromDB(){
+        DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
+        noteDao = daoSession.getRssItemDao();
 
-    public void loadRSS(){
-        try {
-            RSSLoader rssLoader = new RSSLoader();
-            rssLoader.execute(this);
+        List<RssItem> response = noteDao.queryBuilder().where(RssItemDao.Properties.Title.isNotNull()).list();
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        newsList.setAdapter(new NewsListAdapter(response));
+
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+            if (CURRENT_URL != null)
+                ((MainActivity) getActivity()).getArticle(CURRENT_URL);
+            else ((MainActivity) getActivity()).getArticle(response.get(0).getLink());
         }
     }
 
-
-    public void chooseNews(String newsAddress) {
-        newsChooseListener.getArticle(newsAddress);
-    }
 }

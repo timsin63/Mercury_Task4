@@ -11,9 +11,9 @@
     tools:context="com.example.user.task_4.MainActivity">
 
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
+    <fragment
+        android:id="@+id/list_fragment"
+        android:name="com.example.user.task_4.NewsListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
-
+        android:layout_height="match_parent"></fragment>
 </RelativeLayout>

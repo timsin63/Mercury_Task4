@@ -1,5 +1,6 @@
 package com.example.user.task_4;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,10 +11,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.einmalfel.earl.Item;
+import com.example.user.task_4.database.RssItem;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by User on 11/23/2016.
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 
 public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyViewHolder> {
 
+    public static final String EXTRA_URI_TAG = "uri_tag";
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
@@ -34,12 +38,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyView
         }
     }
 
-    NewsListFragment newsListFragment;
-    ArrayList<Item> items;
+    List<RssItem> items;
 
-    public NewsListAdapter(ArrayList<Item> items, NewsListFragment newsListFragment){
+    public NewsListAdapter(List<RssItem> items){
         this.items = items;
-        this.newsListFragment = newsListFragment;
     }
 
 
@@ -60,7 +62,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyView
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                newsListFragment.chooseNews(items.get(position).getLink());
+
+               Intent intent = new Intent(MainActivity.SHOW_ARTICLE);
+                intent.putExtra(EXTRA_URI_TAG, items.get(position).getLink());
+                view.getContext().sendBroadcast(intent);
             }
         });
     }
