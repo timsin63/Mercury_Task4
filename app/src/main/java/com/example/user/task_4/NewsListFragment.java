@@ -5,12 +5,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,13 +35,14 @@ public class NewsListFragment extends Fragment {
     public static final String TAG = "NEWS_LIST_FRAGMENT";
     SwipeRefreshLayout swipeRefreshLayout;
     public static String CURRENT_URL = null;
+    NewsListAdapter adapter;
 
     RecyclerView newsList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f_news_list,  container, false);
+        View view = inflater.inflate(R.layout.f_news_list, container, false);
 
         newsList = (RecyclerView) view.findViewById(R.id.news_list_view);
 
@@ -51,36 +55,43 @@ public class NewsListFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                loadDataFromDB();
+
+
+                RssDownloadService.RssBinder binder = ((MainActivity) getActivity()).binder;
+                RssDownloadService rssDownloadService = binder.getService();
+
+                rssDownloadService.downloadRss();
+
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
 
-        BroadcastReceiver onDownloadFinishedReciever = new BroadcastReceiver() {
+
+
+        BroadcastReceiver onDownloadFinishedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 loadDataFromDB();
             }
         };
 
-        getActivity().registerReceiver(onDownloadFinishedReciever, new IntentFilter(RssDownloadService.DATABASE_UPDATED));
+        getActivity().registerReceiver(onDownloadFinishedReceiver, new IntentFilter(RssDownloadService.DATABASE_UPDATED));
 
         return view;
     }
 
 
-    private void loadDataFromDB(){
+    private void loadDataFromDB() {
         DaoSession daoSession = ((App) getActivity().getApplication()).getDaoSession();
         noteDao = daoSession.getRssItemDao();
 
         List<RssItem> response = noteDao.queryBuilder().where(RssItemDao.Properties.Title.isNotNull()).list();
 
-        newsList.setAdapter(new NewsListAdapter(response));
+        adapter = new NewsListAdapter(response);
+        newsList.setAdapter(adapter);
 
-        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-            if (CURRENT_URL != null)
-                ((MainActivity) getActivity()).getArticle(CURRENT_URL);
-            else ((MainActivity) getActivity()).getArticle(response.get(0).getLink());
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            ((MainActivity) getActivity()).getArticle(CURRENT_URL != null ? CURRENT_URL : response.get(0).getLink());
         }
     }
 

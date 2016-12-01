@@ -1,6 +1,8 @@
 package com.example.user.task_4;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,6 +19,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.user.task_4.MainActivity.selectedPosition;
 
 /**
  * Created by User on 11/23/2016.
@@ -59,17 +63,33 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyView
 
         holder.itemTitle.setText(items.get(position).getTitle());
 
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                Intent intent = new Intent(MainActivity.SHOW_ARTICLE);
+
+                int oldSelectedPostion = selectedPosition;
+                selectedPosition = position;
+
+                notifyItemChanged(oldSelectedPostion);
+                view.setBackgroundColor(Color.BLUE);
+
                 intent.putExtra(EXTRA_URI_TAG, items.get(position).getLink());
                 view.getContext().sendBroadcast(intent);
             }
         });
+
+        if (holder.itemView.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            holder.itemView.setBackgroundColor(selectedPosition == position ? Color.BLUE : Color.WHITE);
+        } else {
+            holder.itemView.setBackgroundColor(Color.WHITE);
+        }
     }
 
+
+    //TODO не пересоздавать фрагмент при перевороте
 
     @Override
     public int getItemCount() {

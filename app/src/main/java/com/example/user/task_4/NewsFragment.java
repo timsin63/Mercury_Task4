@@ -90,12 +90,14 @@ public class NewsFragment extends Fragment {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+            webView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
         }
 
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
+            webView.setVisibility(View.INVISIBLE);
             progressBar.setVisibility(View.VISIBLE);
         }
     }

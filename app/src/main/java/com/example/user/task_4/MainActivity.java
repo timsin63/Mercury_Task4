@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.webkit.WebView;
 
@@ -21,9 +22,11 @@ public class MainActivity extends AppCompatActivity {
     FragmentTransaction fragmentTransaction;
     RssDownloadService rssDownloadService;
     boolean isBounded = false;
+    RssDownloadService.RssBinder binder;
 
     public static final String SHOW_ARTICLE = "Show";
     WebView webView;
+    public static int selectedPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +36,13 @@ public class MainActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.news_web_view);
         fragmentManager = getFragmentManager();
 
+        if (savedInstanceState == null) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                selectedPosition = 0;
+            } else {
+                selectedPosition = -1;
+            }
+        }
         setOrResetBackButton();
 
         fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
@@ -58,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
         bindService(new Intent(this, RssDownloadService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+    public ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 
-            RssDownloadService.RssBinder binder = (RssDownloadService.RssBinder) iBinder;
+            binder = (RssDownloadService.RssBinder) iBinder;
             rssDownloadService = binder.getService();
             isBounded = true;
             rssDownloadService.downloadRss();
