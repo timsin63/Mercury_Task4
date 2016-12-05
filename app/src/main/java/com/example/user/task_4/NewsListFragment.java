@@ -36,14 +36,21 @@ public class NewsListFragment extends Fragment {
     SwipeRefreshLayout swipeRefreshLayout;
     public static String CURRENT_URL = null;
     NewsListAdapter adapter;
+    View view = null;
 
     RecyclerView newsList;
+
+    public NewsListFragment(){
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f_news_list, container, false);
 
+        if (view == null) {
+            view = inflater.inflate(R.layout.f_news_list, container, false);
+        }
         newsList = (RecyclerView) view.findViewById(R.id.news_list_view);
 
         newsList.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));

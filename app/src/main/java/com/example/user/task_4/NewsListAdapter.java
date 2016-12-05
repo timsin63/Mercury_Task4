@@ -3,21 +3,14 @@ package com.example.user.task_4;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.einmalfel.earl.Item;
 import com.example.user.task_4.database.RssItem;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.user.task_4.MainActivity.selectedPosition;
@@ -44,7 +37,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyView
 
     List<RssItem> items;
 
-    public NewsListAdapter(List<RssItem> items){
+    public NewsListAdapter(List<RssItem> items) {
         this.items = items;
     }
 
@@ -67,17 +60,18 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.MyView
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (selectedPosition != position) {
+                    Intent intent = new Intent(MainActivity.SHOW_ARTICLE);
 
-               Intent intent = new Intent(MainActivity.SHOW_ARTICLE);
+                    int oldSelectedPostion = selectedPosition;
+                    selectedPosition = position;
 
-                int oldSelectedPostion = selectedPosition;
-                selectedPosition = position;
+                    notifyItemChanged(oldSelectedPostion);
+                    view.setBackgroundColor(Color.BLUE);
 
-                notifyItemChanged(oldSelectedPostion);
-                view.setBackgroundColor(Color.BLUE);
-
-                intent.putExtra(EXTRA_URI_TAG, items.get(position).getLink());
-                view.getContext().sendBroadcast(intent);
+                    intent.putExtra(EXTRA_URI_TAG, items.get(position).getLink());
+                    view.getContext().sendBroadcast(intent);
+                }
             }
         });
 

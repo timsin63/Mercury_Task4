@@ -26,12 +26,17 @@ public class NewsFragment extends Fragment {
     private String url;
     private WebView webView;
     ProgressBar progressBar;
+    View view = null;
+
+    public NewsFragment(){
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.f_news, container, false);
-
+        if (view == null) {
+            view = inflater.inflate(R.layout.f_news, container, false);
+        }
         webView = (WebView) view.findViewById(R.id.news_web_view);
 
         webView.getSettings().setJavaScriptEnabled(true);

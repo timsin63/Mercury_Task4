@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SHOW_ARTICLE = "Show";
     WebView webView;
     public static int selectedPosition;
+    BroadcastReceiver onItemClickReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        BroadcastReceiver onItemClickReceiver = new BroadcastReceiver() {
+        onItemClickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 getArticle(intent.getStringExtra(NewsListAdapter.EXTRA_URI_TAG));
@@ -88,9 +89,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         if (isBounded){
             unbindService(serviceConnection);
             isBounded = false;
+            unregisterReceiver(onItemClickReceiver);
         }
     }
 
